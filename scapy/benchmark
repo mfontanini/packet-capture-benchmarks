@@ -1,0 +1,57 @@
+#!/usr/bin/python
+
+import time
+import sys
+import logging
+logging.getLogger("scapy.runtime").setLevel(logging.ERROR)
+from pcapy import open_offline
+from scapy.all import Ether, conf
+
+class Tester:
+    def __init__(self, input_file):
+        self.count = 0
+        self.handle = open_offline(input_file)
+    
+    def callback_packet(self, hdr, data):
+        tmp = Ether(data)
+        self.count += 1
+    
+    def callback_dns(self, hdr, data):
+        tmp = Ether(data)
+        dns = tmp[3]
+        for q in dns.qd:
+            self.count += 1
+        for r in dns.an:
+            self.count += 1
+    
+    def test_packet(self):
+        start = time.time()
+        self.handle.loop(0, self.callback_packet)
+        end = time.time()
+        return (self.count, end - start)
+    
+    def test_dns(self):
+        start = time.time()
+        self.handle.loop(0, self.callback_dns)
+        end = time.time()
+        return (self.count, end - start)
+        
+if len(sys.argv) != 4:
+    print "Usage: " + sys.argv[0] + " <input-file> <dns|packet> <repetitions>\n";
+    exit(1)
+
+conf.verb = 0
+total_packets = 0
+durations = []
+
+for i in range(int(sys.argv[3])):
+    tester = Tester(sys.argv[1])
+    if sys.argv[2] == "dns":
+        result = tester.test_dns()
+    else:
+        result = tester.test_packet()
+    total_packets += result[0]
+    durations.append(result[1])
+
+print str(total_packets) + " " + str(int((sum(durations) / len(durations)) * 1000))
+

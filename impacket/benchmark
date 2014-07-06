@@ -1,0 +1,56 @@
+#!/usr/bin/python
+
+import time
+import sys
+from pcapy import open_offline
+from impacket.ImpactDecoder import EthDecoder
+from impacket.dns import DNS
+
+class Tester:
+    def __init__(self, input_file):
+        self.count = 0
+        self.handle = open_offline(input_file)
+        self.decoder = EthDecoder()
+    
+    def callback_packet(self, hdr, data):
+        self.decoder.decode(data)
+        self.count += 1
+    
+    def callback_dns(self, hdr, data):
+        pkt = self.decoder.decode(data)
+        dns = DNS(pkt.child().child().child().get_bytes())
+        for q in dns.get_questions():
+            self.count += 1
+        for a in dns.get_answers():
+            self.count += 1
+    
+    def test_packet(self):
+        start = time.time()
+        self.handle.loop(0, self.callback_packet)
+        end = time.time()
+        return (self.count, end - start)
+    
+    def test_dns(self):
+        start = time.time()
+        self.handle.loop(0, self.callback_dns)
+        end = time.time()
+        return (self.count, end - start)
+        
+if len(sys.argv) != 4:
+    print "Usage: " + sys.argv[0] + " <input-file> <dns|packet> <repetitions>\n";
+    exit(1)
+
+total_packets = 0
+durations = []
+
+for i in range(int(sys.argv[3])):
+    tester = Tester(sys.argv[1])
+    if sys.argv[2] == "dns":
+        result = tester.test_dns()
+    else:
+        result = tester.test_packet()
+    total_packets += result[0]
+    durations.append(result[1])
+
+print str(total_packets) + " " + str(int((sum(durations) / len(durations)) * 1000))
+

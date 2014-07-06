@@ -1,0 +1,89 @@
+<html>
+    <head>
+        <title></title>
+        <style type="text/css">
+            .table-title {
+                font-weight: bold;
+                font-size: 22px;
+            }
+            
+            .table-body {
+                font-size: 20px;
+            }
+            
+            .chart {
+                width: 1200px;
+                height: 900px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        </style>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+            google.load('visualization', '1.0', {'packages':['corechart']});
+            google.setOnLoadCallback(draw_charts);
+            
+            function find_upper_bound(input) {
+                maximum = 0;
+                for(i = 0; i < input.length; ++i) {
+                    if(input[i][0] != "scapy" && input[i][1] > maximum) {
+                        maximum = input[i][1];
+                    }
+                }
+                return maximum * 1.05;
+            }
+            
+            function convert_to_seconds(input) {
+                for(i = 0; i < input.length; ++i) {
+                    input[i][1] = (input[i][1] / 1000);
+                }
+                return input;
+            }
+            
+            function draw_graphic(name, output_div, input) {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Library');
+                data.addColumn('number', 'Seconds');
+                input.sort(
+                    function(a, b) {
+                        return a[1] > b[1];
+                    }
+                );
+                data.addRows(convert_to_seconds(input));
+
+                // Set chart options
+                var options = {
+                    'title' : name,
+                    'width' : 1200,
+                    'height' : 900,
+                    vAxis: { 
+                        viewWindowMode: 'explicit',
+                        viewWindow:{
+                            max:find_upper_bound(input),
+                            min:0
+                        }
+                    },
+                };
+
+                // Instantiate and draw our chart, passing in some options.
+                var chart = new google.visualization.ColumnChart(
+                    document.getElementById(output_div)
+                );
+                chart.draw(data, options);                
+            }
+
+            function draw_charts() {
+                draw_graphic('TCP - no options', 'tcp_no_options', {TEST1_DATA});
+                draw_graphic('TCP - with options', 'tcp_with_options', {TEST2_DATA});
+                draw_graphic('DNS', 'dns', {TEST3_DATA});
+            }
+        </script>
+    </head>
+    <body>
+        <div>
+            <div id="tcp_no_options" class="chart"></div>
+            <div id="tcp_with_options" class="chart"></div>
+            <div id="dns" class="chart"></div>
+        </div>
+    </body>
+</html>
