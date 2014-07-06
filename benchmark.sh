@@ -8,11 +8,11 @@ tests_count=3
 tests=( $@ )
 
 pcap_file=$(mktemp -t benchmark.XXXXXXXXXX)
-#results_file=$(mktemp -t benchmark-results.XXXXXXXXXX)
-results_file="results"
+results_file=$(mktemp -t benchmark-results.XXXXXXXXXX)
 
 for test in $(seq 1 $tests_count)
 do
+    echo "information $test $packet_count" >> $results_file
     echo "[i] Generating $packet_count packets, each of size $packet_size"
     ./pcap_generator/generator $pcap_file $test $packet_count $payload_size
     echo "[+] Done"
@@ -26,7 +26,6 @@ do
         then
             benchmark_input="dns"
         fi
-        echo ./$i/benchmark $pcap_file $benchmark_input $benchmark_runs
         output=$(./$i/benchmark $pcap_file $benchmark_input $benchmark_runs )
         echo "$test $i $output" >> $results_file
     done

@@ -3,8 +3,9 @@
 import sys
 
 class Test:
-    def __init__(self, number):
+    def __init__(self, number, total_packets):
         self.number = number
+        self.total_packets = total_packets
         self.results = {}
     
     def add_result(self, library, count, time):
@@ -40,10 +41,12 @@ class Test:
         output = ''
         for i in self.results:
             time_taken = self.results[i][1] / 1000.0
+            if time_taken == 0:
+                time_taken = 0.001
             output += row_template.format(
                 i, 
                 time_taken, 
-                int(self.results[i][0] / time_taken)
+                int(self.total_packets / time_taken)
             )
         return template.format(output)
 
@@ -56,11 +59,12 @@ class Analyzer:
         for line in fd:
             line = line.strip()
             data = line.split(' ')
-            if len(data) != 4:
-                raise Exception("Invalid file")
-            if data[0] not in self.tests:
-                self.tests[data[0]] = Test(data[0])
-            self.tests[data[0]].add_result(data[1], int(data[2]), int(data[3]))
+            if data[0] == 'information':
+                self.tests[data[1]] = Test(data[1], int(data[2]))
+            else:
+                if len(data) != 4:
+                    raise Exception("Invalid file")
+                self.tests[data[0]].add_result(data[1], int(data[2]), int(data[3]))
     
     def export_to_html_graphic(self, output_stream):
         template = open(Analyzer.html_graphic_template_file).read()

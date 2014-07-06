@@ -42,7 +42,8 @@ if len(sys.argv) != 4:
 total_packets = 0
 durations = []
 
-for i in range(int(sys.argv[3])):
+total_runs = int(sys.argv[3])
+for i in range(total_runs):
     tester = Tester(sys.argv[1])
     if sys.argv[2] == "dns":
         result = tester.test_dns()
@@ -51,5 +52,7 @@ for i in range(int(sys.argv[3])):
     total_packets += result[0]
     durations.append(result[1])
 
-print str(total_packets) + " " + str(int((sum(durations) / len(durations)) * 1000))
+print str(total_packets / total_runs) + " " + str(int((sum(durations) / len(durations)) * 1000))
+
+
 
