@@ -11,6 +11,7 @@ LIBCRAFTER_CXXFLAGS="$CXXFLAGS"
 LIBPCAP_CXXFLAGS="$CXXFLAGS"
 
 LIBTINS_LIBS="-ltins"
+PCAPPLUSPLUS_LIBS="-lPcap++ -lPacket++ -lCommon++ -lpcap"
 LIBPCAP_LIBS="-lpcap"
 LIBCRAFTER_LIBS="-lcrafter -lpcap"
 
@@ -67,6 +68,42 @@ AC_ARG_ENABLE(
             [Tins::DNS dummy])],
             [echo yes],
             [AC_MSG_ERROR([libtins library is not installed!])]
+        )
+    ]
+)
+AC_ARG_ENABLE(
+    pcapplusplus, 
+    [  --disable-pcapplusplus      disable pcap++ benchmark], 
+    [],
+    [ 
+        libraries="$libraries pcapplusplus" 
+        AC_ARG_WITH(
+            [pcapplusplus-include-path],
+            [AS_HELP_STRING([--with-pcaplusplus-include-path],
+            [location of the pcap++ headers])],
+            [PCAPPLUSPLUS_CXXFLAGS="-I$withval"]
+        )
+        AC_ARG_WITH(
+            [pcaplusplus-library-path],
+            [AS_HELP_STRING([--with-pcaplusplus-library-path],
+            [location of the pcap++ library files])],
+            [
+                PCAPPLUSPLUS_LIBS="$PCAPPLUSPLUS_LIBS -L$withval"
+                EXECUTION_LIB_PATH="$withval:$EXECUTION_LIB_PATH"
+            ]
+        )
+        AC_CHECK_HEADERS(
+            [pcapplusplus/PcapPlusPlusVersion.h], 
+            [], 
+            [AC_MSG_ERROR([pcap++ headers are missing])]        
+        )
+        LIBS="-lPcap++ -lPacket++ -lCommon++ -lpcap"
+        echo -n "Checking for pcap++ library... "
+        AC_LINK_IFELSE(
+            [AC_LANG_PROGRAM([#include <pcapplusplus/RawPacket.h>], 
+            [pcpp::RawPacket dummy])],
+            [echo yes],
+            [AC_MSG_ERROR([pcap++ library is not installed!])]
         )
     ]
 )
@@ -145,10 +182,12 @@ AC_ARG_ENABLE(
 LIBS="$old_LIBS"
 
 AC_SUBST(LIBTINS_CXXFLAGS)
+AC_SUBST(PCAPPLUSPLUS_CXXFLAGS)
 AC_SUBST(LIBCRAFTER_CXXFLAGS)
 AC_SUBST(LIBPCAP_CXXFLAGS)
 
 AC_SUBST(LIBTINS_LIBS)
+AC_SUBST(PCAPPLUSPLUS_LIBS)
 AC_SUBST(LIBCRAFTER_LIBS)
 AC_SUBST(LIBPCAP_LIBS)
 

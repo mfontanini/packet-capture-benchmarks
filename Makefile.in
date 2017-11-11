@@ -12,6 +12,11 @@ libtins: libtins/benchmark.o
 libtins/benchmark.o: libtins/benchmark.cpp
 	$(CXX) -c libtins/benchmark.cpp @LIBTINS_CXXFLAGS@ -o libtins/benchmark.o
 
+pcapplusplus: pcapplusplus/benchmark.o
+	$(CXX) pcapplusplus/benchmark.o $(LDFLAGS) @PCAPPLUSPLUS_LIBS@ -o pcapplusplus/benchmark
+    
+pcapplusplus/benchmark.o: libtins/benchmark.cpp
+	$(CXX) -c pcapplusplus/benchmark.cpp -g -O2 @PCAPPLUSPLUS_CXXFLAGS@ -std=c++11 -o pcapplusplus/benchmark.o
 
 pcap_generator: pcap_generator/generator.o
 	$(CXX) pcap_generator/generator.o $(LDFLAGS) @LIBTINS_LIBS@ -o pcap_generator/generator
@@ -42,6 +47,6 @@ benchmark: all
 #	$(CXX) $(CXXFLAGS) $(INCLUDE) $< -o $@
 
 clean:
-	rm -f libtins/benchmark libpcap/benchmark libcrafter/benchmark pcap_generator/generator */*.o
+	rm -f libtins/benchmark libpcap/benchmark libcrafter/benchmark pcap_generator/generator pcapplusplus/benchmark */*.o
 
 -include depends.d

@@ -623,9 +623,11 @@ LIBOBJS
 libraries
 LIBPCAP_LIBS
 LIBCRAFTER_LIBS
+PCAPPLUSPLUS_LIBS
 LIBTINS_LIBS
 LIBPCAP_CXXFLAGS
 LIBCRAFTER_CXXFLAGS
+PCAPPLUSPLUS_CXXFLAGS
 LIBTINS_CXXFLAGS
 EGREP
 GREP
@@ -684,6 +686,9 @@ enable_dpkt
 enable_libtins
 with_libtins_include_path
 with_libtins_library_path
+enable_pcapplusplus
+with_pcapplusplus_include_path
+with_pcaplusplus_library_path
 enable_libpcap
 with_libpcap_include_path
 with_libpcap_library_path
@@ -1315,6 +1320,7 @@ Optional Features:
   --disable-impacket       disable impacket benchmark
   --disable-dpkt           disable dpkt benchmark
   --disable-libtins        disable libtins benchmark
+  --disable-pcapplusplus      disable pcap++ benchmark
   --disable-libpcap        disable libpcap benchmark
   --disable-libcrafter     disable libcrafter benchmark
 
@@ -1325,6 +1331,10 @@ Optional Packages:
                           location of the libtins headers
   --with-libtins-library-path
                           location of the libtins library files
+  --with-pcaplusplus-include-path
+                          location of the pcap++ headers
+  --with-pcaplusplus-library-path
+                          location of the pcap++ library files
   --with-libpcap-include-path
                           location of the libpcap headers
   --with-libpcap-library-path
@@ -2579,6 +2589,7 @@ LIBCRAFTER_CXXFLAGS="$CXXFLAGS"
 LIBPCAP_CXXFLAGS="$CXXFLAGS"
 
 LIBTINS_LIBS="-ltins"
+PCAPPLUSPLUS_LIBS="-lPcap++ -lPacket++ -lCommon++ -lpcap"
 LIBPCAP_LIBS="-lpcap"
 LIBCRAFTER_LIBS="-lcrafter -lpcap"
 
@@ -3065,6 +3076,69 @@ rm -f core conftest.err conftest.$ac_objext \
 
 fi
 
+# Check whether --enable-pcapplusplus was given.
+if test "${enable_pcapplusplus+set}" = set; then :
+  enableval=$enable_pcapplusplus;
+else
+
+        libraries="$libraries pcapplusplus"
+
+# Check whether --with-pcapplusplus-include-path was given.
+if test "${with_pcapplusplus_include_path+set}" = set; then :
+  withval=$with_pcapplusplus_include_path; PCAPPLUSPLUS_CXXFLAGS="-I$withval"
+
+fi
+
+
+# Check whether --with-pcaplusplus-library-path was given.
+if test "${with_pcaplusplus_library_path+set}" = set; then :
+  withval=$with_pcaplusplus_library_path;
+                PCAPPLUSPLUS_LIBS="$PCAPPLUSPLUS_LIBS -L$withval"
+                EXECUTION_LIB_PATH="$withval:$EXECUTION_LIB_PATH"
+
+
+fi
+
+        for ac_header in pcapplusplus/PcapPlusPlusVersion.h
+do :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "pcapplusplus/PcapPlusPlusVersion.h" "ac_cv_header_pcapplusplus_PcapPlusPlusVersion_h" "$ac_includes_default"
+if test "x$ac_cv_header_pcapplusplus_PcapPlusPlusVersion_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_PCAPPLUSPLUS_PCAPPLUSPLUSVERSION_H 1
+_ACEOF
+
+else
+  as_fn_error $? "pcap++ headers are missing" "$LINENO" 5
+
+fi
+
+done
+
+        LIBS="-lPcap++ -lPacket++ -lCommon++ -lpcap"
+        echo -n "Checking for pcap++ library... "
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <pcapplusplus/RawPacket.h>
+int
+main ()
+{
+pcpp::RawPacket dummy
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  echo yes
+else
+  as_fn_error $? "pcap++ library is not installed!" "$LINENO" 5
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+fi
+
 # Check whether --enable-libpcap was given.
 if test "${enable_libpcap+set}" = set; then :
   enableval=$enable_libpcap;
@@ -3221,6 +3295,8 @@ fi
 
 
 LIBS="$old_LIBS"
+
+
 
 
 
