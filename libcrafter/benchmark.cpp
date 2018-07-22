@@ -2,6 +2,7 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <crafter.h>
 #include <pcap.h>
 

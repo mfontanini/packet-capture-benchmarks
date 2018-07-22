@@ -3,6 +3,7 @@
 #include <chrono>
 #include <string>
 #include <vector>
+#include <numeric>
 
 using namespace Tins;
 
