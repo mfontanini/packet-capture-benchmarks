@@ -2,6 +2,7 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+#include <numeric>
 #include <pcap.h>
 
 using clock_type = std::chrono::high_resolution_clock;
